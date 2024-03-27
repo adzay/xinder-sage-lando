@@ -1,27 +1,45 @@
-name: example-sage
+# .lando.yml
+name: example
 recipe: wordpress
-proxy:
-  appserver_nginx:
-    - example-sage.lndo.site
-  theme:
-    - localhost:3009
-#    - localhost:3001
 config:
-  php: '8.1'
-  webroot: wordpress
+  php: '8.2'
   via: nginx
+  webroot: web
+# webroot: wordpress
   database: 'mysql:5.7'
   xdebug: true
+proxy:
+  appserver_nginx:
+    - example.lndo.site # default
+    # - example.test # for testing  
+  phpmyadmin:
+    - pma.example.lndo.site # default
+    # - pma.example.test # for testing
+  mailhog:
+    - mail.example.lndo.site # default
+    # - mail.example.test # for testing
 services:
-  theme:
-    type: node
-    scanner: false
-    services:
-      ports:
-        - 3009:3009
-#        - 3001:3001
+  database:
+    type: 'mysql:5.7'
+    portforward: 3306
+  phpmyadmin:
+    type: phpmyadmin
+    hosts:
+      - database
+  mailhog:
+    type: mailhog
+    hogfrom:
+      - appserver_nginx
+  dev:
+    type: node:20
+    # overrides:
+    #   ports:
+    #     - 3000:3000
 tooling:
-  yarn:
-    service: theme
   npm:
-    service: theme
+    service: dev
+  yarn:
+    service: dev
+excludes:
+  - vendor
+  - node_modules
